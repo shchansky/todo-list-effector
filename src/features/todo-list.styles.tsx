@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 export const Container = styled.div`
@@ -27,7 +26,17 @@ export const Tasks = styled.ul`
 
 export const Task = styled.li`
   list-style: none;
+  display: flex;
   min-height: 30px;
-  border: 1px solid black;
+
   word-wrap: break-word;
 `;
+
+export const TaskData = styled.div`
+  width: 300px;
+  border: 1px solid black;
+  flex-grow: 2;
+  word-wrap: break-word;
+`;
+
+export const TaskButton = styled.button``
