@@ -21,11 +21,11 @@ export const TodoList = () => {
       </Markup.Form>
       <hr />
 
-      <div>
+      <Markup.Tasks>
         {data.map((el, index) => (
-          <div key={index}>{el}</div>
+          <Markup.Task key={index}>{el}</Markup.Task>
         ))}
-      </div>
+      </Markup.Tasks>
     </Markup.Container>
   );
 };
