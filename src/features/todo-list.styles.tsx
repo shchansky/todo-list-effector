@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 export const Container = styled.div`
   width: 350px;
+  box-sizing: border-box;
 `;
 
 export const Form = styled.form`
@@ -21,7 +22,6 @@ export const Tasks = styled.ul`
   padding: 0;
   display: flex;
   flex-direction: column;
-  /* justify-content: start; */
   gap: 4px;
 `;
 
