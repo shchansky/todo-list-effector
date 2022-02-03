@@ -34,13 +34,13 @@ import * as Markup from "./todo-list.styles";
 
 const data = new Array(1);
 
-const valueChanged = createEvent<string>();
 const valueButtonClicked = createEvent();
 const taskDeleted = createEvent();
-const $value = createStore("").on(
-  valueChanged,
-  (_oldValue, newValue) => newValue
-);
+
+const valueChanged = createEvent<string>();
+const $value = createStore("");
+
+$value.on(valueChanged, (_oldValue, newValue) => newValue.trim());
 
 export const TodoList = () => {
   const value = useStore($value);
@@ -48,7 +48,7 @@ export const TodoList = () => {
   const handleClick = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     valueButtonClicked();
-    data.push(`${value}`);
+    if (value) data.push(`${value}`);
     console.log(value);
     valueChanged("");
   };
@@ -75,7 +75,6 @@ export const TodoList = () => {
         {data.map((el, index) => (
           <Markup.Task key={index}>
             <Markup.TaskData>{el}</Markup.TaskData>
-
             <Markup.TaskButton onClick={deleteTask(index)}>
               Del
             </Markup.TaskButton>
@@ -85,3 +84,26 @@ export const TodoList = () => {
     </Markup.Container>
   );
 };
+
+// const inputChange = createEvent<string>();
+
+// const store = createStore("");
+
+// store.on(inputChange, (currentState, arg) => {
+//   const newState = arg;
+//   return newState;
+// })
+
+// inputChange("myText")
+
+/// --------------------
+
+// const input = document.createElement("input");
+
+// const inputChange = (arg: string) => {
+//   const event = new CustomEvent("input-change", { detail: arg });
+// };
+
+// input.addEventListener("input-change", (event: CustomEvent<string>) => {
+//   console.log(event.detail)
+// });
