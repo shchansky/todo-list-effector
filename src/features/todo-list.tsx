@@ -3,70 +3,45 @@ import { createStore, createEvent } from "effector";
 import { useStore } from "effector-react";
 import * as Markup from "./todo-list.styles";
 
-// const data = new Array(1);
 
-// export const TodoList = () => {
-//   const [value, setValue] = React.useState("");
-//   const handleChange = React.useCallback((e) => setValue(e.target.value), []);
+const taskSet = createEvent<string>();
+const taskDel = createEvent<number>();
+const valueSet = createEvent<string>();
 
-//   const handleClick = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//     data.push(value);
-//     setValue((prev) => (prev = ""));
-//   };
-
-//   return (
-//     <Markup.Container>
-//       <Markup.Form onSubmit={handleClick}>
-//         <Markup.Textarea value={value} onChange={handleChange} />
-//         <Markup.Button type="submit">Set!</Markup.Button>
-//       </Markup.Form>
-//       <hr />
-
-//       <Markup.Tasks>
-//         {data.map((el, index) => (
-//           <Markup.Task key={index}>{el}</Markup.Task>
-//         ))}
-//       </Markup.Tasks>
-//     </Markup.Container>
-//   );
-// };
-
-const data = new Array(1);
-
-const valueButtonClicked = createEvent();
-const taskDeleted = createEvent();
-
-const valueChanged = createEvent<string>();
 const $value = createStore("");
+const $tasks = createStore<string[]>([]);
 
-$value.on(valueChanged, (_oldValue, newValue) => newValue.trim());
+$value.on(valueSet, (_oldValue, newValue) => newValue.trim());
+$tasks
+  .on(taskSet, (data, value) => {
+    if (value.length > 0) data.push(`${value}`);
+  })
+  .on(taskDel, (data, index) => data.filter((_,i)=> i !== index) );
 
 export const TodoList = () => {
   const value = useStore($value);
+  const data = useStore($tasks);
 
-  const handleClick = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    valueButtonClicked();
-    if (value) data.push(`${value}`);
-    console.log(value);
-    valueChanged("");
-  };
+  const handleTaskSet =
+    (value: string) => (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      taskSet(value);
+      valueSet("");
+    };
 
-  const deleteTask = React.useCallback(
+  const handleTaskDel = React.useCallback(
     (index: number) => () => {
-      data.splice(index, 1);
-      taskDeleted();
+      taskDel(index);
     },
-    []
+    [data]
   );
 
   return (
     <Markup.Container>
-      <Markup.Form onSubmit={handleClick}>
+      <Markup.Form onSubmit={handleTaskSet(value)}>
         <Markup.Textarea
           value={value}
-          onChange={(e) => valueChanged(e.target.value)}
+          onChange={(e) => valueSet(e.target.value)}
         />
         <Markup.Button type="submit">Set!</Markup.Button>
       </Markup.Form>
@@ -75,7 +50,7 @@ export const TodoList = () => {
         {data.map((el, index) => (
           <Markup.Task key={index}>
             <Markup.TaskData>{el}</Markup.TaskData>
-            <Markup.TaskButton onClick={deleteTask(index)}>
+            <Markup.TaskButton onClick={handleTaskDel(index)}>
               Del
             </Markup.TaskButton>
           </Markup.Task>
@@ -85,25 +60,4 @@ export const TodoList = () => {
   );
 };
 
-// const inputChange = createEvent<string>();
 
-// const store = createStore("");
-
-// store.on(inputChange, (currentState, arg) => {
-//   const newState = arg;
-//   return newState;
-// })
-
-// inputChange("myText")
-
-/// --------------------
-
-// const input = document.createElement("input");
-
-// const inputChange = (arg: string) => {
-//   const event = new CustomEvent("input-change", { detail: arg });
-// };
-
-// input.addEventListener("input-change", (event: CustomEvent<string>) => {
-//   console.log(event.detail)
-// });
