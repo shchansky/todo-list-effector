@@ -13,8 +13,11 @@ const taskDel = createEvent<number>();
 const taskToggleActive = createEvent<number>();
 const valueSet = createEvent<string>();
 
+const statusSet = createEvent<"all" | "active" | "completed">();
+
 const $value = createStore("");
 const $tasks = createStore<TaskData[]>([{ content: "Hi", isActive: true }]);
+const $status = createStore<"all" | "active" | "completed">("all");
 
 $value.on(valueSet, (_oldValue, newValue) => newValue.trim());
 $tasks
@@ -33,10 +36,14 @@ $tasks
     })
   );
 
+$status.on(statusSet, (_oldStatus, newStatus) => newStatus);
+
 export const TodoList = () => {
   const value = useStore($value);
   const data = useStore($tasks);
-  console.log(data)
+  const status = useStore($status);
+
+  console.log(status);
 
   const handleTaskSet =
     (value: string) => (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,6 +68,10 @@ export const TodoList = () => {
         />
         <Markup.Button type="submit">Set!</Markup.Button>
       </Markup.Form>
+      <hr />
+      <button onClick={() => statusSet("all")}>All</button>
+      <button onClick={() => statusSet("active")}>Active</button>
+      <button onClick={() => statusSet("completed")}>Completed</button>
       <hr />
       <Markup.Tasks>
         {data.map((el, index) => (

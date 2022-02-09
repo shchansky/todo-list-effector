@@ -33,7 +33,7 @@ export const Task = styled.li`
 `;
 
 export const TaskData = styled.span<{ isActive: boolean }>`
-  color: ${({isActive}) => ( !isActive ? "red" : "black")};
+  text-decoration: ${({ isActive }) => (!isActive ? "line-through" : "none")};
   width: 300px;
   border: 1px solid black;
   flex-grow: 2;
