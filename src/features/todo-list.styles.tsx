@@ -32,11 +32,12 @@ export const Task = styled.li`
   word-wrap: break-word;
 `;
 
-export const TaskData = styled.div`
+export const TaskData = styled.span<{ isActive: boolean }>`
+  color: ${(isActive) => ( !isActive ? "red" : "black")};
   width: 300px;
   border: 1px solid black;
   flex-grow: 2;
   word-wrap: break-word;
 `;
 
-export const TaskButton = styled.button``
+export const TaskButton = styled.button``;
