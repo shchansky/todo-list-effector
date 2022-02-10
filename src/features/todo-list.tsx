@@ -2,25 +2,25 @@ import React from "react";
 import { createStore, createEvent } from "effector";
 import { useStore } from "effector-react";
 import { v4 } from "uuid";
+import { Form, Tasks, TaskData } from "./components";
 import * as Markup from "./todo-list.styles";
 
-type TaskData = {
-  content: string;
-  isActive: boolean;
-  guid?: string;
-};
 
 const taskSet = createEvent<string>();
-const taskDel = createEvent<number>();
-const taskToggleActive = createEvent<number>();
+const taskDel = createEvent<string>();
+const taskToggleActive = createEvent<string>();
 const valueSet = createEvent<string>();
 
 const statusSet = createEvent<"all" | "active" | "completed">();
 
+const mockData = [
+  { content: "First task from mock", isActive: true, guid: v4() },
+  { content: "Second task from mock", isActive: true, guid: v4() },
+  { content: "Third task from mock", isActive: true, guid: v4() },
+];
+
 const $value = createStore("");
-const $tasks = createStore<TaskData[]>([
-  { content: "Hi", isActive: true, guid: v4() },
-]);
+const $tasks = createStore<TaskData[]>(mockData);
 const $status = createStore<"all" | "active" | "completed">("all");
 
 $value.on(valueSet, (_oldValue, newValue) => newValue.trim());
@@ -29,14 +29,13 @@ $tasks
     if (value.length > 0)
       data.push({ content: `${value}`, isActive: true, guid: v4() });
   })
-  .on(taskDel, (data, index) => data.filter((_, i) => i !== index))
+  .on(taskDel, (data, guid) => data.filter((el) => el.guid !== guid))
 
-  .on(taskToggleActive, (data, index) =>
-    data.map((el, i) => {
-      if (i === index) {
+  .on(taskToggleActive, (data, guid) =>
+    data.map((el) => {
+      if (el.guid === guid) {
         return { ...el, isActive: !el.isActive };
       }
-
       return el;
     })
   );
@@ -48,89 +47,61 @@ export const TodoList = () => {
   const data = useStore($tasks);
   const status = useStore($status);
 
-  // console.log(data);
-
-  const handleTaskSet =
+  const handleTaskSet = React.useCallback(
     (value: string) => (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       taskSet(value);
       valueSet("");
-    };
+    },
+    []
+  );
+
+  const handleChangeValue = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) =>
+  valueSet(e.target.value),[]);
 
   const handleTaskDel = React.useCallback(
-    (index: number) => () => {
-      taskDel(index);
+    (guid: string) => () => {
+      taskDel(guid);
     },
-    [data]
+    []
+  );
+
+  const handleTaskToggleActive = React.useCallback(
+    (guid: string) => () => taskToggleActive(guid),
+    []
+  );
+
+  const handleStatusSet = React.useCallback(
+    (status: "all" | "active" | "completed") => () => statusSet(status),
+    []
   );
 
   return (
     <Markup.Container>
-      <Markup.Form onSubmit={handleTaskSet(value)}>
-        <Markup.Textarea
-          value={value}
-          onChange={(e) => valueSet(e.target.value)}
-        />
-        <Markup.Button type="submit">Set!</Markup.Button>
-      </Markup.Form>
+      <Form
+        value={value}
+        handleTaskSet={handleTaskSet}
+        handleChangeValue={handleChangeValue}
+      />
+
       <hr />
-      <button onClick={() => statusSet("all")}>All</button>
-      <button onClick={() => statusSet("active")}>Active</button>
-      <button onClick={() => statusSet("completed")}>Completed</button>
+      <Markup.StatusButton onClick={handleStatusSet("all")}>
+        All
+      </Markup.StatusButton>
+      <Markup.StatusButton onClick={handleStatusSet("active")}>
+        Active
+      </Markup.StatusButton>
+      <Markup.StatusButton onClick={handleStatusSet("completed")}>
+        Completed
+      </Markup.StatusButton>
       <hr />
-      <Markup.Tasks>
-        {status === "all" &&
-          data.map((el, index) => (
-            <Markup.Task key={el.guid}>
-              <Markup.TaskData
-                isActive={el.isActive}
-                onClick={() => taskToggleActive(index)}
-              >
-                {el.content}
-              </Markup.TaskData>
 
-              <Markup.TaskButton onClick={handleTaskDel(index)}>
-                Del
-              </Markup.TaskButton>
-            </Markup.Task>
-          ))}
-
-        {status === "active" &&
-          data
-            .filter((el) => el.isActive)
-            .map((el, index) => (
-              <Markup.Task key={el.guid}>
-                <Markup.TaskData
-                  isActive={el.isActive}
-                  onClick={() => taskToggleActive(index)}
-                >
-                  {el.content}
-                </Markup.TaskData>
-
-                <Markup.TaskButton onClick={handleTaskDel(index)}>
-                  Del
-                </Markup.TaskButton>
-              </Markup.Task>
-            ))}
-
-        {status === "completed" &&
-          data
-            .filter((el) => !el.isActive)
-            .map((el, index) => (
-              <Markup.Task key={el.guid}>
-                <Markup.TaskData
-                  isActive={el.isActive}
-                  onClick={() => taskToggleActive(index)}
-                >
-                  {el.content}
-                </Markup.TaskData>
-
-                <Markup.TaskButton onClick={handleTaskDel(index)}>
-                  Del
-                </Markup.TaskButton>
-              </Markup.Task>
-            ))}
-      </Markup.Tasks>
+      <Tasks
+        data={data}
+        status={status}
+        handleTaskDel={handleTaskDel}
+        handleTaskToggleActive={handleTaskToggleActive}
+      />
     </Markup.Container>
   );
 };
