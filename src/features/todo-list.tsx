@@ -1,79 +1,23 @@
 import React from "react";
-import { createStore, createEvent } from "effector";
-import { useStore } from "effector-react";
-import { v4 } from "uuid";
-import { Form, Tasks, TaskData, SelectButtons } from "./components";
-import { mockData } from "./todo-list.constants";
+import * as store from "../store";
+import { Form, Tasks, SelectButtons } from "./components";
+import * as hooks from "./todo-list.hooks";
 import * as Markup from "./todo-list.styles";
 
-
-
-const taskSet = createEvent<string>();
-const taskDel = createEvent<string>();
-const taskToggleActive = createEvent<string>();
-const valueSet = createEvent<string>();
-
-const statusSet = createEvent<"all" | "active" | "completed">();
-
-
-const $value = createStore("");
-const $tasks = createStore<TaskData[]>(mockData);
-const $status = createStore<"all" | "active" | "completed">("all");
-
-$value.on(valueSet, (_oldValue, newValue) => newValue.trim());
-$tasks
-  .on(taskSet, (data, value) => {
-    if (value.length > 0)
-      data.push({ content: `${value}`, isActive: true, guid: v4() });
-  })
-  .on(taskDel, (data, guid) => data.filter((el) => el.guid !== guid))
-
-  .on(taskToggleActive, (data, guid) =>
-    data.map((el) => {
-      if (el.guid === guid) {
-        return { ...el, isActive: !el.isActive };
-      }
-      return el;
-    })
-  );
-
-$status.on(statusSet, (_oldStatus, newStatus) => newStatus);
-
 export const TodoList = () => {
-  const value = useStore($value);
-  const data = useStore($tasks);
-  const status = useStore($status);
+  /* #region Editor Store */
+  const { value } = store.layout.useState();
+  const { data } = store.layout.useState();
+  const { status } = store.layout.useState();
+  /* #endregion */
 
-  const handleTaskSet = React.useCallback(
-    (value: string) => (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      taskSet(value);
-      valueSet("");
-    },
-    []
-  );
-
-  const handleChangeValue = React.useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => valueSet(e.target.value),
-    []
-  );
-
-  const handleTaskDel = React.useCallback(
-    (guid: string) => () => {
-      taskDel(guid);
-    },
-    []
-  );
-
-  const handleTaskToggleActive = React.useCallback(
-    (guid: string) => () => taskToggleActive(guid),
-    []
-  );
-
-  const handleStatusSet = React.useCallback(
-    (status: "all" | "active" | "completed") => () => statusSet(status),
-    []
-  );
+  const {
+    handleTaskSet,
+    handleChangeValue,
+    handleTaskDel,
+    handleTaskToggleActive,
+    handleStatusSet,
+  } = hooks.useHandlers();
 
   return (
     <Markup.Container>
@@ -82,9 +26,7 @@ export const TodoList = () => {
         handleTaskSet={handleTaskSet}
         handleChangeValue={handleChangeValue}
       />
-
       <SelectButtons handleStatusSet={handleStatusSet} />
-
       <Tasks
         data={data}
         status={status}
