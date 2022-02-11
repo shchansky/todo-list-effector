@@ -2,9 +2,8 @@ import React from "react";
 import { createStore, createEvent } from "effector";
 import { useStore } from "effector-react";
 import { v4 } from "uuid";
-import { Form, Tasks, TaskData } from "./components";
+import { Form, Tasks, TaskData, SelectButtons } from "./components";
 import * as Markup from "./todo-list.styles";
-
 
 const taskSet = createEvent<string>();
 const taskDel = createEvent<string>();
@@ -56,8 +55,10 @@ export const TodoList = () => {
     []
   );
 
-  const handleChangeValue = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) =>
-  valueSet(e.target.value),[]);
+  const handleChangeValue = React.useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => valueSet(e.target.value),
+    []
+  );
 
   const handleTaskDel = React.useCallback(
     (guid: string) => () => {
@@ -84,17 +85,7 @@ export const TodoList = () => {
         handleChangeValue={handleChangeValue}
       />
 
-      <hr />
-      <Markup.StatusButton onClick={handleStatusSet("all")}>
-        All
-      </Markup.StatusButton>
-      <Markup.StatusButton onClick={handleStatusSet("active")}>
-        Active
-      </Markup.StatusButton>
-      <Markup.StatusButton onClick={handleStatusSet("completed")}>
-        Completed
-      </Markup.StatusButton>
-      <hr />
+      <SelectButtons handleStatusSet={handleStatusSet} />
 
       <Tasks
         data={data}
