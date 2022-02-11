@@ -3,7 +3,10 @@ import { createStore, createEvent } from "effector";
 import { useStore } from "effector-react";
 import { v4 } from "uuid";
 import { Form, Tasks, TaskData, SelectButtons } from "./components";
+import { mockData } from "./todo-list.constants";
 import * as Markup from "./todo-list.styles";
+
+
 
 const taskSet = createEvent<string>();
 const taskDel = createEvent<string>();
@@ -12,11 +15,6 @@ const valueSet = createEvent<string>();
 
 const statusSet = createEvent<"all" | "active" | "completed">();
 
-const mockData = [
-  { content: "First task from mock", isActive: true, guid: v4() },
-  { content: "Second task from mock", isActive: true, guid: v4() },
-  { content: "Third task from mock", isActive: true, guid: v4() },
-];
 
 const $value = createStore("");
 const $tasks = createStore<TaskData[]>(mockData);
